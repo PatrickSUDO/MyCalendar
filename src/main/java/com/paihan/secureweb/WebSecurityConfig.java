@@ -1,4 +1,4 @@
-package com.paihan.calender.secureweb;
+package com.paihan.secureweb;
 
 
 import org.springframework.context.annotation.Bean;
