@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.paihan</groupId>
-    <artifactId>calender</artifactId>
+    <artifactId>calendar</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>calender</name>
+    <name>calendar</name>
     <description>Demo project for Spring Boot</description>
 
     <properties>
