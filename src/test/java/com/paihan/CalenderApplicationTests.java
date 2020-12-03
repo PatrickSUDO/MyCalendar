@@ -1,4 +1,4 @@
-package com.paihan.calender;
+package java.com.paihan;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

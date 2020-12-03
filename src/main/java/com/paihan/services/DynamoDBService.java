@@ -117,7 +117,7 @@ public class DynamoDBService {
                 workItem.setDate(work.getDate());
                 workItem.setId(work.getId());
 
-                // Push the workItem to the list
+                //Push the workItem to the list
                 itemList.add(workItem);
             }
 
