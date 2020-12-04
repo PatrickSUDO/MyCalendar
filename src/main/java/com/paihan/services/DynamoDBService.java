@@ -1,6 +1,8 @@
 package com.paihan.services;
 
 import com.paihan.entities.WorkItem;
+import com.sun.tools.javac.util.Name;
+import org.springframework.beans.factory.annotation.Value;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
@@ -29,6 +31,7 @@ import java.time.ZoneOffset;
 import java.util.*;
 import org.springframework.stereotype.Component;
 
+
 /*
  Before running this code example, create a table named Work with a PK named id
  */
@@ -36,7 +39,6 @@ import org.springframework.stereotype.Component;
 public class DynamoDBService {
 
     private DynamoDbClient getClient() {
-
         // Create a DynamoDbClient object
         Region region = Region.EU_WEST_1;
         DynamoDbClient ddb = DynamoDbClient.builder()
@@ -51,7 +53,8 @@ public class DynamoDBService {
     public String getItem(String idValue) {
 
         DynamoDbClient ddb = getClient();
-        String status = "";
+        String event = "";
+        String eventDate = "";
         String description = "";
 
         HashMap<String, AttributeValue> keyToGet = new HashMap<String,AttributeValue>();
@@ -73,13 +76,16 @@ public class DynamoDBService {
                 String k = entry.getKey();
                 AttributeValue v = entry.getValue();
 
-                if (k.compareTo("description") == 0) {
+                //if the attribute names are equal
+                if (k.compareTo("event") ==  0) {
+                    event = v.s();
+                } else if (k.compareTo("eventDate") == 0) {
+                    eventDate = v.s();
+                } else if (k.compareTo("description") == 0) {
                     description = v.s();
-                } else if (k.compareTo("status") == 0) {
-                    status = v.s();
                 }
             }
-            return convertToString(toXmlItem(idValue,description,status));
+            return convertToString(toXmlItem(idValue,event,eventDate,description));
 
         } catch (DynamoDbException e) {
             System.err.println(e.getMessage());
@@ -111,9 +117,8 @@ public class DynamoDBService {
                 workItem = new WorkItem();
                 Work work = results.next();
                 workItem.setName(work.getName());
-                workItem.setGuide(work.getGuide());
+                workItem.setEvent(work.getEvent());
                 workItem.setDescription(work.getDescription());
-                workItem.setStatus(work.getStatus());
                 workItem.setDate(work.getDate());
                 workItem.setId(work.getId());
 
@@ -131,11 +136,13 @@ public class DynamoDBService {
         return null ;
     }
 
-    // Archives an item based on the key
-    public String archiveItem(String id){
+
+    // Updates items status based on id in the Work table
+    public String UpdateItem(String id, String event, String eventDate, String description){
         DynamoDbClient ddb = getClient();
 
         HashMap<String,AttributeValue> itemKey = new HashMap<String,AttributeValue>();
+
         itemKey.put("id", AttributeValue.builder()
                 .s(id)
                 .build());
@@ -144,48 +151,21 @@ public class DynamoDBService {
                 new HashMap<String,AttributeValueUpdate>();
 
         // Update the column specified by name with updatedVal
-        updatedValues.put("archive", AttributeValueUpdate.builder()
+        updatedValues.put("event", AttributeValueUpdate.builder()
                 .value(AttributeValue.builder()
-                        .s("Closed").build())
+                        .s(event).build())
                 .action(AttributeAction.PUT)
                 .build());
 
-        UpdateItemRequest request = UpdateItemRequest.builder()
-                .tableName("Work")
-                .key(itemKey)
-                .attributeUpdates(updatedValues)
-                .build();
-
-        try {
-            ddb.updateItem(request);
-            return"The item was successfully archived";
-        } catch (ResourceNotFoundException e) {
-            System.err.println(e.getMessage());
-            System.exit(1);
-        } catch (DynamoDbException e) {
-            System.err.println(e.getMessage());
-            System.exit(1);
-        }
-        return "";
-    }
-
-    // Updates items in the Work table
-    public String UpdateItem(String id, String status){
-        DynamoDbClient ddb = getClient();
-
-        HashMap<String,AttributeValue> itemKey = new HashMap<String,AttributeValue>();
-
-        itemKey.put("id", AttributeValue.builder()
-                .s(id)
+        updatedValues.put("eventDate", AttributeValueUpdate.builder()
+                .value(AttributeValue.builder()
+                        .s(eventDate).build())
+                .action(AttributeAction.PUT)
                 .build());
 
-        HashMap<String, AttributeValueUpdate> updatedValues =
-                new HashMap<String,AttributeValueUpdate>();
-
-        // Update the column specified by name with updatedVal
-        updatedValues.put("status", AttributeValueUpdate.builder()
+        updatedValues.put("description", AttributeValueUpdate.builder()
                 .value(AttributeValue.builder()
-                        .s(status).build())
+                        .s(description).build())
                 .action(AttributeAction.PUT)
                 .build());
 
@@ -208,8 +188,35 @@ public class DynamoDBService {
         return "";
     }
 
+    public String deleteItemWithId(String id){
+
+        DynamoDbClient ddb = getClient();
+
+        HashMap<String, AttributeValue> itemKey = new HashMap<String,AttributeValue>();
+        itemKey.put("id", AttributeValue.builder()
+                .s(id)
+                .build());
+
+        // Create a DeleteItemRequest object
+        DeleteItemRequest request = DeleteItemRequest.builder()
+                .key(itemKey)
+                .tableName("Work")
+                .build();
+
+        try {
+            ddb.deleteItem(request);
+            return "The Status for the item was successfully deleted";
+
+        } catch (DynamoDbException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
+        return "";
+
+    }
+
     // Get Open items from the DynamoDB table
-    public String getOpenItems() {
+    public String getAllItems() {
 
         // Create a DynamoDbEnhancedClient
         DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient.builder()
@@ -230,7 +237,7 @@ public class DynamoDBService {
             Map<String, String> myExMap = new HashMap<>();
             myExMap.put("#archive", "archive");
 
-            // Set the Expression so only Closed items are queried from the Work table
+            // Set the Expression so only open items are queried from the Work table
             Expression expression = Expression.builder()
                     .expressionValues(myMap)
                     .expressionNames(myExMap)
@@ -253,9 +260,8 @@ public class DynamoDBService {
                 workItem = new WorkItem();
                 Work work = results.next();
                 workItem.setName(work.getName());
-                workItem.setGuide(work.getGuide());
+                workItem.setEvent(work.getEvent());
                 workItem.setDescription(work.getDescription());
-                workItem.setStatus(work.getStatus());
                 workItem.setDate(work.getDate());
                 workItem.setId(work.getId());
 
@@ -274,70 +280,6 @@ public class DynamoDBService {
         return "" ;
     }
 
-    // Get Closed items from the DynamoDB table
-    public String getClosedItems() {
-
-        // Create a DynamoDbEnhancedClient
-        DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient.builder()
-                .dynamoDbClient(getClient())
-                .build();
-
-        try{
-            // Create a DynamoDbTable object
-            DynamoDbTable<Work> table = enhancedClient.table("Work", TableSchema.fromBean(Work.class));
-
-            AttributeValue attr = AttributeValue.builder()
-                    .s("Closed")
-                    .build();
-
-            Map<String, AttributeValue> myMap = new HashMap<>();
-            myMap.put(":val1",attr);
-
-            Map<String, String> myExMap = new HashMap<>();
-            myExMap.put("#archive", "archive");
-
-            // Set the Expression so only Closed items are queried from the Work table
-            Expression expression = Expression.builder()
-                    .expressionValues(myMap)
-                    .expressionNames(myExMap)
-                    .expression("#archive = :val1")
-                    .build();
-
-            ScanEnhancedRequest enhancedRequest = ScanEnhancedRequest.builder()
-                    .filterExpression(expression)
-                    .limit(15)
-                    .build();
-
-            // Get items
-            Iterator<Work> results = table.scan(enhancedRequest).items().iterator();
-            WorkItem workItem ;
-            ArrayList<WorkItem> itemList = new ArrayList();
-
-            while (results.hasNext()) {
-
-                // Populate a WorkItem
-                workItem = new WorkItem();
-                Work work = results.next();
-                workItem.setName(work.getName());
-                workItem.setGuide(work.getGuide());
-                workItem.setDescription(work.getDescription());
-                workItem.setStatus(work.getStatus());
-                workItem.setDate(work.getDate());
-                workItem.setId(work.getId());
-
-                // Push the workItem to the list
-                itemList.add(workItem);
-            }
-
-            return convertToString(toXml(itemList));
-
-        } catch (DynamoDbException e) {
-            System.err.println(e.getMessage());
-            System.exit(1);
-        }
-        System.out.println("Done");
-        return "" ;
-    }
 
     public void setItem(WorkItem item) {
 
@@ -370,9 +312,7 @@ public class DynamoDBService {
             record.setId(myGuid);
             record.setDescription(item.getDescription());
             record.setDate(now()) ;
-            record.setStatus(item.getStatus());
-            record.setArchive("Open");
-            record.setGuide(item.getGuide());
+            record.setEvent(item.getEvent());
 
             // Put the customer data into a DynamoDB table
             workTable.putItem(record);
@@ -427,15 +367,13 @@ public class DynamoDBService {
                 desc.appendChild( doc.createTextNode(myItem.getDescription() ) );
                 item.appendChild( desc );
 
-                // Set Guide
-                Element guide = doc.createElement( "Guide" );
-                guide.appendChild( doc.createTextNode(myItem.getGuide() ) );
-                item.appendChild( guide );
+                // Set event
+                Element event = doc.createElement( "Event" );
+                event.appendChild( doc.createTextNode(myItem.getEvent() ) );
+                item.appendChild( event );
 
                 // Set Status
-                Element status = doc.createElement( "Status" );
-                status.appendChild( doc.createTextNode(myItem.getStatus() ) );
-                item.appendChild( status );
+
             }
 
             return doc;
@@ -467,7 +405,8 @@ public class DynamoDBService {
     }
 
     // Convert Work data into an XML schema to pass back to client
-    private Document toXmlItem(String id2, String desc2, String status2) {
+    private Document toXmlItem(String id2, String event2,
+                               String eventDate2, String description2) {
 
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -486,15 +425,21 @@ public class DynamoDBService {
             id.appendChild( doc.createTextNode(id2 ) );
             item.appendChild( id );
 
-            // Set Description
-            Element desc = doc.createElement( "Description" );
-            desc.appendChild( doc.createTextNode(desc2 ) );
-            item.appendChild( desc );
+            // Set Event
+            Element event = doc.createElement( "Event" );
+            event.appendChild( doc.createTextNode(event2) );
+            item.appendChild( event );
 
-            //Set Status
-            Element status = doc.createElement( "Status" );
-            status.appendChild( doc.createTextNode(status2 ) );
-            item.appendChild( status );
+            // Set Event Date
+            Element eventDate = doc.createElement( "eventDate" );
+            eventDate.appendChild( doc.createTextNode(eventDate2) );
+            item.appendChild(eventDate);
+
+            // Set Description
+            Element description = doc.createElement( "Description" );
+            description.appendChild( doc.createTextNode(description2) );
+            item.appendChild( description );
+
 
             return doc;
 

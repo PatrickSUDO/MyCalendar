@@ -1,7 +1,8 @@
-package com.example.secureweb;
+package com.paihan.secureweb;
 
 import com.paihan.entities.WorkItem;
 import com.paihan.services.DynamoDBService;
+import com.paihan.services.ShareEvent;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,8 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RequestMethod;
-import com.paihan.WriteExcel;
-import com.paihan.SendMessages;
+import com.paihan.services.WriteExcel;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,14 +26,14 @@ public class MainController {
     DynamoDBService dbService;
 
     @Autowired
-    SendMessages sendMsg;
+    ShareEvent sendMsg;
 
     @Autowired
     WriteExcel excel;
 
     @GetMapping("/")
     public String root() {
-        return "index";
+        return "items";
     }
 
     @GetMapping("/login")
@@ -60,14 +60,14 @@ public class MainController {
         String name = getLoggedUser();
 
         String event = request.getParameter("event");
+        String eventDate = request.getParameter("event_date");
         String description = request.getParameter("description");
-        String status = request.getParameter("status");
 
         // Create a Work Item object to pass to the injectNewSubmission method
         WorkItem myWork = new WorkItem();
         myWork.setEvent(event);
+        myWork.setEventDate(eventDate);
         myWork.setDescription(description);
-        myWork.setStatus(status);
         myWork.setName(name);
 
         dbService.setItem(myWork);
@@ -91,15 +91,6 @@ public class MainController {
         return "Report is created";
     }
 
-    // Archives a work item
-    @RequestMapping(value = "/archive", method = RequestMethod.POST)
-    @ResponseBody
-    String archiveWorkItem(HttpServletRequest request, HttpServletResponse response) {
-
-        String id = request.getParameter("id");
-        dbService.archiveItem(id);
-        return id;
-    }
 
     // Modifies the value of a work item
     @RequestMapping(value = "/changewi", method = RequestMethod.POST)
@@ -107,8 +98,10 @@ public class MainController {
     String changeWorkItem(HttpServletRequest request, HttpServletResponse response) {
 
         String id = request.getParameter("id");
-        String status = request.getParameter("status");
-        dbService.UpdateItem(id, status);
+        String event = request.getParameter("event");
+        String eventDate = request.getParameter("event_date");
+        String description = request.getParameter("description");
+        dbService.UpdateItem(id, event, eventDate, description);
         return id;
     }
 
@@ -117,15 +110,10 @@ public class MainController {
     @ResponseBody
     String retrieveItems(HttpServletRequest request, HttpServletResponse response) {
 
-        String type = request.getParameter("type");
-
         // Pass back items from the DynamoDB table
         String xml = "";
 
-        if (type.compareTo("archive") == 0)
-            xml = dbService.getClosedItems();
-        else
-            xml = dbService.getOpenItems();
+        xml = dbService.getAllItems();
 
         return xml;
     }
@@ -139,6 +127,16 @@ public class MainController {
         String xmlRes = dbService.getItem(id);
         return xmlRes;
     }
+
+    @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
+    @ResponseBody
+    String deleteWork(HttpServletRequest request, HttpServletResponse response) {
+
+        String id = request.getParameter("id");
+        String xmlRes = dbService.deleteItemWithId(id);
+        return xmlRes;
+    }
+
 
     private String getLoggedUser() {
 

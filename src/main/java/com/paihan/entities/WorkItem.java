@@ -4,12 +4,13 @@ public class WorkItem {
 
     private String id;
     private String name;
-    private String event ;
+    private String event;
+    private String eventDate;
     private String date;
     private String description;
-    private String status;
 
-    public void setId (String id) {
+
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -17,15 +18,7 @@ public class WorkItem {
         return this.id;
     }
 
-    public void setStatus (String status) {
-        this.status = status;
-    }
-
-    public String getStatus() {
-        return this.status;
-    }
-
-    public void setDescription (String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
@@ -33,7 +26,15 @@ public class WorkItem {
         return this.description;
     }
 
-    public void setDate (String date) {
+    public String getEventDate() {
+        return eventDate;
+    }
+
+    public void setEventDate(String eventDate) {
+        this.eventDate = eventDate;
+    }
+
+    public void setDate(String date) {
         this.date = date;
     }
 
@@ -41,7 +42,7 @@ public class WorkItem {
         return this.date;
     }
 
-    public void setName (String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -49,7 +50,7 @@ public class WorkItem {
         return this.name;
     }
 
-    public void setEvent (String guide) {
+    public void setEvent(String guide) {
         this.event = guide;
     }
 
