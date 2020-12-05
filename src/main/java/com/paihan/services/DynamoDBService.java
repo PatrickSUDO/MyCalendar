@@ -32,6 +32,7 @@ import java.util.*;
 import org.springframework.stereotype.Component;
 
 
+
 /*
  Before running this code example, create a table named Work with a PK named id
  */
@@ -116,13 +117,15 @@ public class DynamoDBService {
                 // Populate a WorkItem
                 workItem = new WorkItem();
                 Work work = results.next();
+                workItem.setId(work.getId());
                 workItem.setName(work.getName());
                 workItem.setEvent(work.getEvent());
+                workItem.setEventDate(work.getEventDate());
                 workItem.setDescription(work.getDescription());
                 workItem.setDate(work.getDate());
-                workItem.setId(work.getId());
 
                 //Push the workItem to the list
+
                 itemList.add(workItem);
             }
 
@@ -219,6 +222,7 @@ public class DynamoDBService {
     public String getAllItems() {
 
         // Create a DynamoDbEnhancedClient
+
         DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient.builder()
                 .dynamoDbClient(getClient())
                 .build();
@@ -227,48 +231,27 @@ public class DynamoDBService {
             // Create a DynamoDbTable object
             DynamoDbTable<Work> table = enhancedClient.table("Work", TableSchema.fromBean(Work.class));
 
-            AttributeValue attr = AttributeValue.builder()
-                    .s("Open")
-                    .build();
-
-            Map<String, AttributeValue> myMap = new HashMap<>();
-            myMap.put(":val1",attr);
-
-            Map<String, String> myExMap = new HashMap<>();
-            myExMap.put("#archive", "archive");
-
-            // Set the Expression so only open items are queried from the Work table
-            Expression expression = Expression.builder()
-                    .expressionValues(myMap)
-                    .expressionNames(myExMap)
-                    .expression("#archive = :val1")
-                    .build();
-
-            ScanEnhancedRequest enhancedRequest = ScanEnhancedRequest.builder()
-                    .filterExpression(expression)
-                    .limit(15)
-                    .build();
-
-            // Scan items
-            Iterator<Work> results = table.scan(enhancedRequest).items().iterator();
+            // Get items in the Work table
+            Iterator<Work> results = table.scan().items().iterator();
             WorkItem workItem ;
             ArrayList<WorkItem> itemList = new ArrayList();
-
             while (results.hasNext()) {
 
                 // Populate a WorkItem
                 workItem = new WorkItem();
                 Work work = results.next();
+
+                workItem.setId(work.getId());
                 workItem.setName(work.getName());
                 workItem.setEvent(work.getEvent());
+                workItem.setEventDate(work.getEventDate());
                 workItem.setDescription(work.getDescription());
                 workItem.setDate(work.getDate());
-                workItem.setId(work.getId());
+
 
                 // Push the workItem to the list
                 itemList.add(workItem);
             }
-
             return convertToString(toXml(itemList));
 
         } catch (DynamoDbException e) {
@@ -308,12 +291,13 @@ public class DynamoDBService {
 
             // Populate the table
             Work record = new Work();
-            record.setUsername(item.getName());
+
             record.setId(myGuid);
+            record.setUsername(item.getName());
+            record.setEvent(item.getEvent());
+            record.setEventDate(item.getEventDate());
             record.setDescription(item.getDescription());
             record.setDate(now()) ;
-            record.setEvent(item.getEvent());
-
             // Put the customer data into a DynamoDB table
             workTable.putItem(record);
 
@@ -357,25 +341,28 @@ public class DynamoDBService {
                 name.appendChild( doc.createTextNode(myItem.getName() ) );
                 item.appendChild( name );
 
-                // Set Date
-                Element date = doc.createElement( "Date" );
-                date.appendChild( doc.createTextNode(myItem.getDate() ) );
-                item.appendChild( date );
+                // Set event
+                Element event = doc.createElement( "Event" );
+                event.appendChild( doc.createTextNode(myItem.getEvent() ) );
+                item.appendChild( event );
+
+                // Set event date
+                Element eventDate = doc.createElement( "EventDate" );
+                eventDate.appendChild( doc.createTextNode(myItem.getEventDate()));
+                item.appendChild( eventDate );
 
                 // Set Description
                 Element desc = doc.createElement( "Description" );
                 desc.appendChild( doc.createTextNode(myItem.getDescription() ) );
                 item.appendChild( desc );
 
-                // Set event
-                Element event = doc.createElement( "Event" );
-                event.appendChild( doc.createTextNode(myItem.getEvent() ) );
-                item.appendChild( event );
+                // Set Date
+                Element date = doc.createElement( "Date" );
+                date.appendChild( doc.createTextNode(myItem.getDate() ) );
+                item.appendChild( date );
 
-                // Set Status
 
             }
-
             return doc;
         } catch(ParserConfigurationException e) {
             e.printStackTrace();
@@ -439,7 +426,6 @@ public class DynamoDBService {
             Element description = doc.createElement( "Description" );
             description.appendChild( doc.createTextNode(description2) );
             item.appendChild( description );
-
 
             return doc;
 

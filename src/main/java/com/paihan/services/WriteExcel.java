@@ -26,7 +26,6 @@ public class WriteExcel {
 
     // Returns an InputStream that represents the Excel report
     public java.io.InputStream exportExcel(List<WorkItem> list) {
-
         try {
             java.io.InputStream is = write(list);
             return is;
@@ -59,7 +58,6 @@ public class WriteExcel {
         stream = (java.io.ByteArrayOutputStream) os;
         byte[] myBytes = stream.toByteArray();
         java.io.InputStream is = new java.io.ByteArrayInputStream(myBytes);
-
         return is;
     }
 
@@ -86,18 +84,18 @@ public class WriteExcel {
         cv.setAutosize(true);
 
         // Write a few headers
-        addCaption(sheet, 0, 0, "Writer");
-        addCaption(sheet, 1, 0, "Date");
-        addCaption(sheet, 2, 0, "Event");
+        addCaption(sheet, 0, 0, "User");
+        addCaption(sheet, 1, 0, "Event");
+        addCaption(sheet, 2, 0, "Event Date");
         addCaption(sheet, 3, 0, "Description");
-        addCaption(sheet, 4, 0, "Status");
+        addCaption(sheet, 4, 0, "Date");
+
     }
 
     // Write the ItemData to the Excel report
     private int createContent(WritableSheet sheet, List<WorkItem> list) throws WriteException {
 
         int size = list.size();
-
         // Add data to the Excel report
         for (int i = 0; i < size; i++) {
 
@@ -106,23 +104,24 @@ public class WriteExcel {
             // Get the work item values
             String name = wi.getName();
             String event = wi.getEvent();
+            String eventDate = wi.getEventDate();
+            String description = wi.getDescription();
             String date = wi.getDate();
-            String des = wi.getDescription();
-            String status = wi.getStatus();
+
 
             // First column
             addLabel(sheet, 0, i + 2, name);
             // Second column
-            addLabel(sheet, 1, i + 2, date);
+            addLabel(sheet, 1, i + 2, event);
 
             // Third column
-            addLabel(sheet, 2, i + 2, event);
+            addLabel(sheet, 2, i + 2, eventDate);
 
             // Forth column
-            addLabel(sheet, 3, i + 2, des);
+            addLabel(sheet, 3, i + 2, description);
 
             // Fifth column
-            addLabel(sheet, 4, i + 2, status);
+            addLabel(sheet, 4, i + 2, date);
 
         }
         return size;

@@ -4,7 +4,7 @@
     <title>Add Items</title>
     <script th:src="|https://code.jquery.com/jquery-1.12.4.min.js|"></script>
     <script th:src="|https://code.jquery.com/ui/1.11.4/jquery-ui.min.js|"></script>
-    <script src="../public/js/contact_me.js" th:src="@{/js/contact_me.js}"></script>
+    <script src="../public/js/submit.js" th:src="@{/js/submit.js}"></script>
 
     <!-- CSS files -->
     <link rel="stylesheet" th:href="|https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css|"/>
@@ -13,7 +13,7 @@
 <body>
 <header th:replace="layout :: site-header"/>
 <div class="container">
-    <h3>Welcome <span sec:authentication="principal.username">User</span> to DynamoDB Item Tracker</h3>
+    <h3>Welcome <span sec:authentication="principal.username">User</span> to My Calender</h3>
     <p>Add new items by filling in this table and clicking <b>Create Item</b></p>
 
     <div class="row">
@@ -23,21 +23,21 @@
                 <div class="control-group">
                     <div class="form-group floating-label-form-group controls mb-0 pb-2">
                         <label>Event</label>
-                        <input class="form-control" id="event" type="event" placeholder="AWS Event/AWS API" required="required" data-validation-required-message="Please enter the Event.">
+                        <input class="form-control" id="event" type="event" placeholder="Event" required="required" data-validation-required-message="Please enter the Event.">
+                        <p class="help-block text-danger"></p>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="form-group floating-label-form-group controls mb-0 pb-2">
+                        <label>Event Date</label>
+                        <textarea class="form-control" id="event_date" placeholder="Event Date: yyyy-mm-dd" required="required" data-validation-required-message="Please enter a event date."></textarea>
                         <p class="help-block text-danger"></p>
                     </div>
                 </div>
                 <div class="control-group">
                     <div class="form-group floating-label-form-group controls mb-0 pb-2">
                         <label>Description</label>
-                        <textarea class="form-control" id="description" rows="5" placeholder="Description" required="required" data-validation-required-message="Please enter a description."></textarea>
-                        <p class="help-block text-danger"></p>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <div class="form-group floating-label-form-group controls mb-0 pb-2">
-                        <label>Status</label>
-                        <textarea class="form-control" id="status" rows="5" placeholder="Status" required="required" data-validation-required-message="Please enter the status."></textarea>
+                        <textarea class="form-control" id="description" rows="5" placeholder="Description" required="required" data-validation-required-message="Please enter the description."></textarea>
                         <p class="help-block text-danger"></p>
                     </div>
                 </div>

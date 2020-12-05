@@ -65,10 +65,11 @@ public class MainController {
 
         // Create a Work Item object to pass to the injectNewSubmission method
         WorkItem myWork = new WorkItem();
+        myWork.setName(name);
         myWork.setEvent(event);
         myWork.setEventDate(eventDate);
         myWork.setDescription(description);
-        myWork.setName(name);
+
 
         dbService.setItem(myWork);
         return "Item added";
@@ -80,11 +81,14 @@ public class MainController {
     String getReport(HttpServletRequest request, HttpServletResponse response) {
 
         String email = request.getParameter("email");
+        System.out.println(email);
         List<WorkItem> theList = dbService.getListItems();
         java.io.InputStream is = excel.exportExcel(theList);
+        System.out.println("Excel ok");
 
         try {
             sendMsg.sendReport(is, email);
+
         } catch (IOException e) {
             e.getStackTrace();
         }

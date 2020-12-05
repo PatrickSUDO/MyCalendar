@@ -5,20 +5,28 @@ $(function() {
     $("#SendButton" ).click(function($e) {
 
         var event = $('#event').val();
+        var event_date = $('#event_date').val();
         var description = $('#description').val();
         var status = $('#status').val();
 
-        //var description = $("textarea#description").val();
-        if (description.length > 350)
+
+        if (event.length > 100)
         {
-            alert("Description has too many characters");
+            alert("Event has too many characters");
             return;
         }
 
-        //var status = $("textarea#status").val();
-        if (status.length > 350)
+
+        if (new Date(event_date) == "Invalid Date")
         {
-            alert("Status has too many characters");
+            alert("Date should be in the format YYYY-MM-DD");
+            return;
+        }
+
+
+        if (description.length > 350)
+        {
+            alert("Description has too many characters");
             return;
         }
 
@@ -27,7 +35,7 @@ $(function() {
         xhr.addEventListener("load", loadNewItems, false);
         xhr.open("POST", "../add", true);   //buildFormit -- a Spring MVC controller
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");//necessary
-        xhr.send("event=" + event + "&description=" + description+ "&status=" + status);
+        xhr.send("event=" + event + "&event_date=" + event_date+ "&description=" + description);
     } );// END of the Send button click
 
     //Handler for the uploadSave call

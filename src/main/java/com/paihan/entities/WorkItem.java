@@ -50,8 +50,8 @@ public class WorkItem {
         return this.name;
     }
 
-    public void setEvent(String guide) {
-        this.event = guide;
+    public void setEvent(String event) {
+        this.event = event;
     }
 
     public String getEvent() {

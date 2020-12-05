@@ -11,7 +11,7 @@ public class Work {
     private String username ;
     private String description ;
     private String event;
-    private String evenDate;
+    private String eventDate;
     private String date;
 
 
@@ -30,12 +30,12 @@ public class Work {
         return this.username;
     }
 
-    public String getEvenDate() {
-        return evenDate;
+    public String getEventDate() {
+        return eventDate;
     }
 
-    public void setEvenDate(String evenDate) {
-        this.evenDate = evenDate;
+    public void setEventDate(String eventDate) {
+        this.eventDate = eventDate;
     }
 
     public void setUsername(String username) {

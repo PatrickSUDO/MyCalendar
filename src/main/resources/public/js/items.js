@@ -36,7 +36,7 @@ function modItem()
 {
     var id = $('#id').val();
     var event = $('#event').val();
-    var event_date = $('#e').val();
+    var event_date = $('#event_date').val();
     var description = $('#description').val();
 
     if (id == "")
@@ -45,17 +45,19 @@ function modItem()
         return;
     }
 
+    if (event.length > 100)
+    {
+        alert("Event has too many characters");
+        return;
+    }
+
+
     if (new Date(event_date) == "Invalid Date")
     {
         alert("Date should be in the format YYYY-MM-DD");
         return;
     }
 
-    if (event.length > 100)
-    {
-        alert("Event has too many characters");
-        return;
-    }
 
     if (description.length > 350)
     {
@@ -135,7 +137,6 @@ function loadItems(event) {
         );
     });
 
-    document.getElementById("info3").innerHTML = "Active Items";
 
 }
 
@@ -165,15 +166,15 @@ function ModifyItem() {
 
 
 // Handler for the uploadSave call
-function onModifyLoad(event) {
+function onModifyLoad(modifyEvent) {
 
-    var xml = event.target.responseText;
+    var xml = modifyEvent.target.responseText;
     $(xml).find('Item').each(function () {
 
         var $field = $(this);
         var id = $field.find('Id').text();
         var event = $field.find('Event').text();
-        var event_date = $field.find('Event_Date').text();
+        var event_date = $field.find('EventDate').text();
         var description = $field.find('Description').text();
         var date = $field.find('Date').text();
 
@@ -187,84 +188,7 @@ function onModifyLoad(event) {
     });
 }
 
-
-function Report() {
-    var email = $('#manager option:selected').text();
-
-    // Post to report
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener("load", onReport, false);
-    xhr.open("POST", "../report", true);
-    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");//necessary
-    xhr.send("email=" + email);
-}
-
-function onReport(event) {
-
-    var data = event.target.responseText;
-    alert(data);
-}
-
-
-function GetArcItems()
-{
-    var xhr = new XMLHttpRequest();
-    var type="archive";
-    xhr.addEventListener("load", loadArcItems, false);
-    xhr.open("POST", "../retrieve", true);   //buildFormit -- a Spring MVC controller
-    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");//necessary
-    xhr.send("type=" + type);
-}
-
-function loadArcItems(event) {
-
-    // Disable buttons when Archive button
-    $('#reportbutton').prop("disabled",true);
-    $('#reportbutton').css("color", "#0d010d");
-    $('#singlebutton').prop("disabled",true);
-    $('#singlebutton').css("color", "#0d010d");
-    $('#updatebutton').prop("disabled",true);
-    $('#updatebutton').css("color", "#0d010d");
-    $('#archive').prop("disabled",true);
-    $('#archive').css("color", "#0d010d");
-
-
-    $("#modform").hide();
-
-
-
-
-    var xml = event.target.responseText;
-    var oTable = $('#myTable').dataTable();
-    oTable.fnClearTable(true);
-
-    $(xml).find('Item').each(function () {
-
-        var $field = $(this);
-        var id = $field.find('Id').text();
-        var name = $field.find('Name').text();
-        var event = $field.find('Event').text();
-        var date = $field.find('Date').text();
-        var description = $field.find('Description').text();
-        var status = $field.find('Status').text();
-
-        //Set the new data
-        oTable.fnAddData( [
-            id,
-            name,
-            event,
-            date,
-            description,
-            status,,]
-        );
-    });
-
-    document.getElementById("info3").innerHTML = "Archive Items";
-
-}
-
-function archiveItem()
-{
+function DeleteItem() {
     var table = $('#myTable').DataTable();
     var myId="";
     var arr = [];
@@ -280,17 +204,47 @@ function archiveItem()
         return;
     }
 
+    // Post to modify
     var xhr = new XMLHttpRequest();
-    xhr.addEventListener("load", onArch, false);
-    xhr.open("POST", "../archive", true);   //buildFormit -- a Spring MVC controller
+    xhr.addEventListener("load", onDeleteLoad, false);
+    xhr.open("DELETE", "../delete", true);   //buildFormit -- a Spring MVC controller
     xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");//necessary
     xhr.send("id=" + myId);
 }
 
-function onArch(event) {
+// Handler for the delete call
+function onDeleteLoad(deleteEvent) {
 
-    var xml = event.target.responseText;
-    alert("Item "+xml +" is archived now");
+    var msg = deleteEvent.target.responseText;
+    alert("You have successfully deleted item "+msg)
+
     //Refresh the grid
     GetItems();
 }
+
+
+
+function Share() {
+    var email = $("input[name='mail']").val();
+
+    //Valid the email
+    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (!re.test(String(email).toLowerCase())){
+        alert("Please enter correct email.")
+        return;
+    }
+    // Post to report
+    var xhr = new XMLHttpRequest();
+    xhr.addEventListener("load", onShare, false);
+    xhr.open("POST", "../report", true);
+    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");//necessary
+    xhr.send("email=" + email);
+}
+
+function onShare(reportEvent) {
+
+    var data = reportEvent.target.responseText;
+    alert(data);
+}
+
+

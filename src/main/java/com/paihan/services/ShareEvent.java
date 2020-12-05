@@ -115,7 +115,6 @@ public class ShareEvent {
                     .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
                     .region(region)
                     .build();
-
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             message.writeTo(outputStream);
 
