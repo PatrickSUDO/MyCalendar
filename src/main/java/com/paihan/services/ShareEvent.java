@@ -3,6 +3,7 @@ package com.paihan.services;
 import org.apache.commons.io.IOUtils;
 import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.ses.SesClient;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -20,13 +21,14 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Properties;
 import software.amazon.awssdk.core.SdkBytes;
-import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
-import software.amazon.awssdk.services.ses.model.RawMessage;
-import software.amazon.awssdk.services.ses.model.SesException;
+import software.amazon.awssdk.services.ses.model.*;
 import org.springframework.stereotype.Component;
+import software.amazon.awssdk.services.ses.model.VerifyEmailIdentityResponse;
+import software.amazon.awssdk.services.ses.model.VerifyEmailIdentityRequest;
+
 
 @Component
-public class ShareEvent {
+public class ShareEvent{
 
     private String sender = "pai.su@ucdconnect.ie";
 
@@ -40,6 +42,20 @@ public class ShareEvent {
     private String bodyHTML = "<html>" + "<head></head>" + "<body>" + "<h1>Hello!</h1>"
             + "<p>See the attached file of this event.</p>" + "</body>" + "</html>";
 
+    private SesClient getClient() {
+
+        // Create a SES object
+        Region region = Region.EU_WEST_1;
+        SesClient ses = SesClient.builder()
+                .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
+                .region(region)
+                .build();
+
+        return ses;
+    }
+
+
+
     public void sendReport(InputStream is, String emailAddress ) throws IOException {
 
         // Convert the InputStream to a byte[]
@@ -50,6 +66,29 @@ public class ShareEvent {
         } catch (MessagingException e) {
             e.getStackTrace();
         }
+    }
+
+    public boolean isVerifiedEmail(String emailAddress){
+        SesClient client = getClient();
+
+        GetIdentityVerificationAttributesRequest request =
+                GetIdentityVerificationAttributesRequest.builder().identities(emailAddress).build();
+
+        GetIdentityVerificationAttributesResponse response = client.getIdentityVerificationAttributes(request);
+
+        return response.verificationAttributes().containsKey(emailAddress);
+    }
+
+    public String sendVerificationEmail(String emailAddress){
+
+        SesClient client = getClient();
+        VerifyEmailIdentityRequest emailIdentityRequest = VerifyEmailIdentityRequest.builder()
+                .emailAddress(emailAddress)
+                .build();
+
+        VerifyEmailIdentityResponse response = client.verifyEmailIdentity(emailIdentityRequest);
+
+        return "Please receive the verification email and share again.";
     }
 
     public void send(byte[] attachment, String emailAddress) throws MessagingException, IOException {
@@ -115,6 +154,8 @@ public class ShareEvent {
                     .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
                     .region(region)
                     .build();
+
+
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             message.writeTo(outputStream);
 

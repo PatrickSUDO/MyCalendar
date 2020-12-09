@@ -1,5 +1,24 @@
 $(function() {
 
+    $('input[name="datetimes"]').daterangepicker({
+        timePicker: true,
+        showDropdowns: true,
+        timePicker24Hour: true,
+        // startDate: $(this).val().substring(0, 17),
+        // endDate: $(this).val().substring(21),
+        autoUpdateInput: true,
+        locale:{
+            format: 'YYYY-MM-DD HH:mm'
+        }
+    });
+    $('input[name="datetimes"]').on('apply.daterangepicker', function(ev, picker) {
+        $(this).val(picker.startDate.format('YYYY-MM-DD HH:mm') + ' - ' + picker.endDate.format('YYYY-MM-DD HH:mm'));
+    });
+
+});
+
+$(function() {
+
     $( "#dialogtemplate2" ).dialog();
 
     $('#myTable').DataTable( {
@@ -23,12 +42,6 @@ $(function() {
             $(this).addClass('selected');
         }
     } );
-
-
-    // Disable the reportbutton
-    // $('#reportbutton').prop("disabled",true);
-    // $('#reportbutton').css("color", "#0d010d");
-
 });
 
 
@@ -48,13 +61,6 @@ function modItem()
     if (event.length > 100)
     {
         alert("Event has too many characters");
-        return;
-    }
-
-
-    if (new Date(event_date) == "Invalid Date")
-    {
-        alert("Date should be in the format YYYY-MM-DD");
         return;
     }
 
@@ -98,17 +104,9 @@ function GetItems() {
     xhr.send("type=" + type);
 }
 
-function loadItems(event) {
 
-    // // Enable the buttons
-    // $('#singlebutton').prop("disabled",false);
-    // $('#updatebutton').prop("disabled",false);
-    // $('#reportbutton').prop("disabled",false);
-    // $('#reportbutton').css("color", "#FFFFFF");
-    // $('#singlebutton').css("color", "#FFFFFF");
-    // $('#updatebutton').css("color", "#FFFFFF");
-    // $('#archive').prop("disabled",false);
-    // $('#archive').css("color", "#FFFFFF");
+
+function loadItems(event) {
 
     $("#modform").show();
 
@@ -241,10 +239,10 @@ function Share() {
     xhr.send("email=" + email);
 }
 
-function onShare(reportEvent) {
-
-    var data = reportEvent.target.responseText;
+function onShare(reportEvent) {var data = reportEvent.target.responseText;
     alert(data);
 }
+
+
 
 

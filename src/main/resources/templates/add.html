@@ -6,9 +6,16 @@
     <script th:src="|https://code.jquery.com/ui/1.11.4/jquery-ui.min.js|"></script>
     <script src="../public/js/submit.js" th:src="@{/js/submit.js}"></script>
 
+    <!-- datetime picker  -->
+    <script type="text/javascript" th:src="|https://cdn.jsdelivr.net/jquery/latest/jquery.min.js|"></script>
+    <script type="text/javascript" th:src="|https://cdn.jsdelivr.net/momentjs/latest/moment.min.js|"></script>
+    <script type="text/javascript" th:src="|https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js|"></script>
+
+
     <!-- CSS files -->
     <link rel="stylesheet" th:href="|https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css|"/>
     <link rel="stylesheet" href="../public/css/styles.css" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" type="text/css" th:href="|https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css|" />
 </head>
 <body>
 <header th:replace="layout :: site-header"/>
@@ -30,7 +37,7 @@
                 <div class="control-group">
                     <div class="form-group floating-label-form-group controls mb-0 pb-2">
                         <label>Event Date</label>
-                        <textarea class="form-control" id="event_date" placeholder="Event Date: yyyy-mm-dd" required="required" data-validation-required-message="Please enter a event date."></textarea>
+                        <input type="text" style="width:300px" id="event_date" name="datetimes"/>
                         <p class="help-block text-danger"></p>
                     </div>
                 </div>

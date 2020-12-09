@@ -10,6 +10,14 @@
     <script th:src="|https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js|"></script>
     <script src="../public/js/items.js" th:src="@{/js/items.js}"></script>
 
+    <!-- datetime picker-->
+<!--    <script type="text/javascript" th:src="|https://cdn.jsdelivr.net/jquery/latest/jquery.min.js|"></script>-->
+    <script type="text/javascript" th:src="|https://cdn.jsdelivr.net/momentjs/latest/moment.min.js|"></script>
+    <script type="text/javascript" th:src="|https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js|"></script>
+
+
+
+
     <!-- CSS files  -->
     <link rel="stylesheet" th:href="|https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css|"/>
     <link rel="stylesheet" th:href="|https://cdn.datatables.net/v/dt/dt-1.10.20/datatables.min.css|"/>
@@ -17,6 +25,7 @@
     <link rel="stylesheet" href="../public/css/col.css" th:href="@{/css/col.css}" />
     <link rel="stylesheet" href="../public/css/button.css" th:href="@{/css/button.css}" />
     <link rel="stylesheet" href="../public/css/all.min.css" th:href="@{/css/all.min.css}" />
+    <link rel="stylesheet" th:href="|https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css|" />
 
 </head>
 <body>
@@ -34,7 +43,7 @@
             <th>Item Id</th>
             <th>Name</th>
             <th>Event</th>
-            <th>Event Date</th>
+            <th>Event DateTime</th>
             <th>Description</th>
             <th>Date Created</th>
 
@@ -55,7 +64,7 @@
             <th>Item Id</th>
             <th>Name</th>
             <th>Event</th>
-            <th>Event Date</th>
+            <th>Event DateTime</th>
             <th>Description</th>
             <th>Date Created</th>
         </tr>
@@ -87,8 +96,11 @@
         </div>
         <div class="control-group">
             <div class="form-group floating-label-form-group controls mb-0 pb-2">
-                <label>Event Date</label>
-                <textarea class="form-control" id="event_date" rows="1" placeholder="Event Date"  data-validation-required-message="Event Date"></textarea>
+                <label>Event DateTime</label>
+                <input type="text" style="width:300px" id="event_date" name="datetimes"/>
+                <script>
+
+                    </script>
                 <p class="help-block text-danger"></p>
             </div>
         </div>
@@ -118,7 +130,7 @@
         </tr>
         <tr>
             <td>
-                <button class="shiny-blue" id="singlebutton" type="button" onclick="ModifyItem()">Select Single Item</button>
+                <button class="shiny-blue" id="singlebutton" type="button" onclick="ModifyItem()">Select This Item</button>
             </td>
 
             <td>

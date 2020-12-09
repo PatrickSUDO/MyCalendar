@@ -81,14 +81,14 @@ public class MainController {
     String getReport(HttpServletRequest request, HttpServletResponse response) {
 
         String email = request.getParameter("email");
-        System.out.println(email);
         List<WorkItem> theList = dbService.getListItems();
         java.io.InputStream is = excel.exportExcel(theList);
         System.out.println("Excel ok");
 
+        if (!sendMsg.isVerifiedEmail(email)) return sendMsg.sendVerificationEmail(email);
+
         try {
             sendMsg.sendReport(is, email);
-
         } catch (IOException e) {
             e.getStackTrace();
         }

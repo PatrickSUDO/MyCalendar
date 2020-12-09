@@ -1,25 +1,13 @@
 $(function() {
-
-
-
     $("#SendButton" ).click(function($e) {
 
         var event = $('#event').val();
         var event_date = $('#event_date').val();
         var description = $('#description').val();
-        var status = $('#status').val();
-
 
         if (event.length > 100)
         {
             alert("Event has too many characters");
-            return;
-        }
-
-
-        if (new Date(event_date) == "Invalid Date")
-        {
-            alert("Date should be in the format YYYY-MM-DD");
             return;
         }
 
@@ -49,7 +37,24 @@ $(function() {
 
 } );
 
+$(function() {
+    $('input[name="datetimes"]').daterangepicker({
+        timePicker: true,
+        showDropdowns: true,
+        timePicker24Hour: true,
+        startDate: moment().startOf('hour'),
+        endDate: moment().startOf('hour').add(1, 'hour'),
+        autoUpdateInput: true,
+        locale:{
+            format: 'YYYY-MM-DD HH:mm'
+        }
+    });
 
+    $('input[name="datetimes"]').on('apply.daterangepicker', function(ev, picker) {
+        $(this).val(picker.startDate.format('YYYY-MM-DD HH:mm') + ' - ' + picker.endDate.format('YYYY-MM-DD HH:mm'));
+    });
+
+});
 
 function getDataValue()
 {
